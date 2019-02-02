@@ -19,21 +19,38 @@ class Blockchain {
     // will not create the genesis block
     generateGenesisBlock(){
         // Add your code here
+        return new Block.Block("Genesis block");
     }
 
     // Get block height, it is auxiliar method that return the height of the blockchain
     getBlockHeight() {
         // Add your code here
+        return this.bd.getBlocksCount();
     }
 
     // Add new block
     addBlock(block) {
-        // Add your code here
+			block.timeStamp = new Date().getTime().toString().slice(0, -3);
+			block.hash = SHA256(JSON.stringify(block)).toString();
+			this.getBlockHeight()
+			.then((height) => {
+					block.height = height + 1;
+					if (block.height > 1) {
+							// previous block hash
+							this.getBlock(height)
+							.then((lastBlock) => {
+									block.previousHash = lastBlock.hash;
+							});
+					}
+					console.log(height);
+				return this.bd.addLevelDBData(height+1, block);						
+			});
     }
 
     // Get Block By Height
     getBlock(height) {
         // Add your code here
+        return this.bd.getLevelDBData(height);
     }
 
     // Validate if Block is being tampered by Block Height
@@ -44,7 +61,7 @@ class Blockchain {
     // Validate Blockchain
     validateChain() {
         // Add your code here
-    }
+		}
 
     // Utility Method to Tamper a Block for Test Validation
     // This method is for testing purpose
@@ -58,5 +75,9 @@ class Blockchain {
     }
    
 }
+
+// let bc = new Blockchain();
+
+// bc.addBlock(new Block.Block("t block"))
 
 module.exports.Blockchain = Blockchain;
